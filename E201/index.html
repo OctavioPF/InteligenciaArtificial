@@ -8,7 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
 </head>
 <body>
-
+    <br>File<input type="file" id="upload-json"/><br>
+    Binary File <input type="file" id="upload-weights">
+    <input type="button" value="Cargar modelo" onclick="cargarModelo();"/><br><br>
+    <input type="button" value="Detener Entrnamiento" onclick="StopTraining=true;"/><br>
+    <input type="button" value="Guardar modelo" onclick="guardarModelo();"/><br><br>
+    <input type="button" value="curva de inferencia" onclick="verCurvaInferencia();"/><br>
     <script src="script.js"></script>
     
 </body>

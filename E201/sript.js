@@ -9,6 +9,37 @@ async function getData(){
         casa.precio!=null && casa.cuartos !=null));
     return datosLimpios;
 }
+async function cargarModelo() {
+    const uploadJSONInput = document.getElementById('upload-json');
+    const uploadWeightsInput = document.getElementById('upload-weights');
+    
+    modelo = await tf.LoadLayersModel(tf.io.browserFiles(
+    
+    ))
+    
+}
+
+async function verCurvaInferencia() {
+    var data = await getData();
+    var tensorData = await convertirDatosATensores(data);
+    const{entradasMax,entradasMin,etiquetasMin,EtiquetasMax} = tensorData
+    const [xs,preds] = tf.tidy(()=>{
+        const xs = tf.linspace(0,1,100);
+        const preds = modelo.predict(xs.reshape([100,1]));
+        const desnormX = xs.mul(entradasMax.sub(entradasMIn)).add(EntradasMin);
+        const desnormY = preds.mul(EtiquetasMax.sub(etiquetasMin)).add(etiquetasMin);
+
+    return [desnormX.dataSync(),desnormY.dataSync()];
+    
+});
+
+const puntosPrediccion = Array.from(xs).map((val,i)=>{
+    return{x:val,y:preds[i]};
+});
+
+const puntosOriginales = data.map(d=>({
+    x: d.cuartos, y: d.precio,
+    }));
 
 function vizualizarDatos(){
     const valores = datos.map(d=>(
@@ -81,13 +112,16 @@ async function entrenarModelo(model, inputs, labels) {
         tamanioBatch,
         epochs,
         shuffle:true
-        callbacks:tfvis.show,fitCallBacks(
-        {name:'Training Perfomance'},
-        ['loss','mse'],
-        {height:200,callbacks:['onEpochEnd']}
+        callbacks:{
+            onEpochEnd:(epoch,log)=>{
+            tfvis.show.history(surface,history,['loss','mse']);
+            if (stopTrainig) {
+                modelo.stopTrainig = true;
+            }
+        }
     }
-    });
-}
+});
+
 
 async function run(){
     const data = await getData();
